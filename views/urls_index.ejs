@@ -12,7 +12,8 @@
     <% valuesArray.push(urls[i]); %>
     <% }}; %>
     <% for (var x in valuesArray) { %>
-      <p><a href='http://www.google.com'><%= 'http://localhost:8080/' + Object.keys(urls)[x] %><a> (<%= valuesArray[x] %>)</p>
+      <%= longURL %>
+      <p><a href=''><%= 'http://localhost:8080/' + Object.keys(urls)[x] %></a> (<%= valuesArray[x] %>)</p>
    <% }; %>
 
 
