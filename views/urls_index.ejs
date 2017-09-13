@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <% include ./partials/_header %>
+
+  <body>
+  <h1>Your Short URLs</h1>
+
+  <% var valuesArray = []; %>
+  <% for (var i in urls) { %>
+   <% if (urls.hasOwnProperty(i)) { %>
+    <% valuesArray.push(urls[i]); %>
+    <% }}; %>
+    <% for (var x in valuesArray) { %>
+      <p><a href='http://www.google.com'><%= 'http://localhost:8080/' + Object.keys(urls)[x] %><a> (<%= valuesArray[x] %>)</p>
+   <% }; %>
+
+
+
+   <p><a href='http://www.google.com'>Shrinkify a new link!</a></p>
+  </body>
+</html>
