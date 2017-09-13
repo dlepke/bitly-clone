@@ -1,3 +1,19 @@
   <head>
-    <title>Shrinki.fy</title>
+    <title>Shrinkify</title>
   </head>
+
+  <body>
+    <% if (!username){ %>
+      <form action="/login" method="POST">
+        <input id="username" type="text" name="username" placeholder="Enter your username">
+        <button>Let's get shrinkifying!</button>
+      </form>
+    <% } else { %>
+      <label>Welcome, <%= username %>!</label>
+      <form action="/logout" method="POST">
+        <button>Logout</button>
+      </form>
+    <% } %>
+
+
+  </body>

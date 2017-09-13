@@ -6,6 +6,9 @@ var PORT = process.env.PORT || 8080;
 const bodyParser = require('body-parser');    //this is the middleware
 app.use(bodyParser.urlencoded({extended: true}));
 
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 app.set('view engine', 'ejs');
 
 function generateRandomString() {
@@ -46,17 +49,20 @@ app.get('/hello', (req, res) => { //this is just a random page
 });
 
 app.get('/urls', (req, res) => {             //this is the list of urls and short urls (homepage-ish)
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { urls: urlDatabase,
+                       username: req.cookies["username"] };
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {        //this is where you enter a new url to shorten
-  res.render('urls_new');
+  let templateVars = { username: req.cookies["username"] };
+  res.render('urls_new', templateVars);
 });
 
 app.get('/urls/:id', (req, res) => { // this is where you view a specific url/short url pair
   let templateVars = { shortURL: req.params.id,
-                       longURL: urlDatabase[req.params.id.toString()] };
+                       longURL: urlDatabase[req.params.id.toString()],
+                       username: req.cookies["username"] };
   res.render('urls_show', templateVars);
 });
 
@@ -82,6 +88,16 @@ app.post('/urls', (req, res) => { // this is what adds the new url/short url pai
   urlDatabase[randomString] = req.body.longURL;
   res.redirect(`/urls/${randomString}`);
 });
+
+app.post('/login', (req, res) => {
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');
+})
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+})
 
 
 app.listen(PORT, () => {        //this is how the server 'listens' for requests
