@@ -5,10 +5,12 @@
 
 
   <body>
+  <h3>My Short URL: <%= shortURL %></h3>
 
-  <%= urls %>
-  <%= urls %>: <a href=<%= urls %>>http://localhost:8080/<%= shortURL %></a>
-
-
+  <form action="/urls/<%= shortURL %>/edit" method="POST">
+    <input id='longURL' type='text' name='longURL' value="<%= longURL %>" style='width:300px'>
+    <button type='update' action="/urls/<% shortURL %>/edit">Update</button>
+  </form>
   </body>
 </html>
+

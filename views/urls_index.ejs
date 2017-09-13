@@ -6,18 +6,24 @@
   <body>
   <h1>Your Short URLs</h1>
 
-  <% var valuesArray = []; %>
-  <% for (var i in urls) { %>
-   <% if (urls.hasOwnProperty(i)) { %>
-    <% valuesArray.push(urls[i]); %>
-    <% }}; %>
-    <% for (var x in valuesArray) { %>
-      <%= longURL %>
-      <p><a href=''><%= 'http://localhost:8080/' + Object.keys(urls)[x] %></a> (<%= valuesArray[x] %>)</p>
-   <% }; %>
+
+  <% for (var x in urls) { %>
+    <form method="POST" action='/urls/<%= x %>/delete'>
+    <p>
+      <%= x %>
+      (<%= urls[x] %>)
+
+
+      <a href="/urls/<%= x %>">Edit</a>
+
+      <button>Delete</button>
+
+    </p>
+    </form>
+  <% } %>
 
 
 
-   <p><a href='http://www.google.com'>Shrinkify a new link!</a></p>
+   <p><a href='http://localhost8080/urls'>Shrinkify a new link!</a></p>
   </body>
 </html>
