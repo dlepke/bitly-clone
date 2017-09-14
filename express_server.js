@@ -34,6 +34,20 @@ var urlDatabase = { //this is the database in use
   "9sm5xK": "http://www.google.com"
 };
 
+var users = {
+  "hermione": {
+    id: "hermione",
+    email: "hermione@hogwarts.com",
+    password: "ilovereading"
+  },
+  "ron": {
+    id: "ron",
+    email: "ron@hogwarts.com",
+    password: "scabberssucks"
+  }
+};
+
+
 
 
 app.get('/', (req, res) => { //homepage currently just says 'Hello!'
@@ -49,20 +63,23 @@ app.get('/hello', (req, res) => { //this is just a random page
 });
 
 app.get('/urls', (req, res) => {             //this is the list of urls and short urls (homepage-ish)
+  let user_id = req.cookies["user_id"];
   let templateVars = { urls: urlDatabase,
-                       username: req.cookies["username"] };
+                       user: users[user_id] };
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {        //this is where you enter a new url to shorten
-  let templateVars = { username: req.cookies["username"] };
+  let user_id = req.cookies["user_id"];
+  let templateVars = { user: users[user_id] };
   res.render('urls_new', templateVars);
 });
 
 app.get('/urls/:id', (req, res) => { // this is where you view a specific url/short url pair
+  let user_id = req.cookies["user_id"];
   let templateVars = { shortURL: req.params.id,
                        longURL: urlDatabase[req.params.id.toString()],
-                       username: req.cookies["username"] };
+                       user: users[user_id] };
   res.render('urls_show', templateVars);
 });
 
@@ -70,6 +87,24 @@ app.get("/u/:shortURL", (req, res) => { // this is what redirects when you click
   let longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
+
+app.get('/register', (req, res) => {
+  let user_id = req.cookies["user_id"];
+  let templateVars = { user: users[user_id] };
+  res.render('register', templateVars);
+})
+
+app.get('/fourhundred', (req, res) => {
+  res.render('fourhundred')
+})
+
+app.get('/login', (req, res) => {
+  let user_id = req.cookies["user_id"];
+  let templateVars = { user: users[user_id] };
+  res.render('login', templateVars);
+})
+
+
 
 
 app.post('/urls/:id/delete', (req, res) => { //this handles delete requests
@@ -90,13 +125,56 @@ app.post('/urls', (req, res) => { // this is what adds the new url/short url pai
 });
 
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
+  for (var userId in users) {
+    if (users[userId].email === req.body.email && users[userId].password === req.body.password) {
+      res.cookie('email', req.body.email);
+      res.cookie('password', req.body.password);
+      res.cookie('user_id', userId);
+      res.redirect('/urls');
+      break;
+    }
+  }
+  res.render('fourohthree')
 })
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('email');
+  res.clearCookie('password');
+  res.clearCookie('user_id');
   res.redirect('/urls');
+})
+
+app.post('/register', (req, res) => {
+  let userEmailArray = [];
+  for (var userId in users) {
+    userEmailArray.push(users[userId].email);
+  }
+
+  function checkIfExisting(givenEmail, userEmail) {
+    return givenEmail === userEmail;
+  }
+
+  var emailIsValid = true;
+  for (var i in userEmailArray) {
+    if (checkIfExisting(req.body.email, userEmailArray[i])) {
+      emailIsValid = false;
+      break;
+    }
+  }
+  if (emailIsValid) {
+    var randomID = generateRandomString();
+    res.cookie('email', req.body.email);
+    res.cookie('password', req.body.password);
+    res.cookie('user_id', randomID);
+    users[randomID] = {
+      user_id: randomID,
+      email: req.body.email,
+      password: req.body.password
+    }
+    res.redirect('/urls');
+  } else {
+    res.redirect('/fourhundred')
+  }
 })
 
 
@@ -108,4 +186,5 @@ app.listen(PORT, () => {        //this is how the server 'listens' for requests
 
 
 
+//do we need to make it so added urls are only accessible by the user who created them
 

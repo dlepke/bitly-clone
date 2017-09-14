@@ -3,13 +3,10 @@
   </head>
 
   <body>
-    <% if (!username){ %>
-      <form action="/login" method="POST">
-        <input id="username" type="text" name="username" placeholder="Enter your username">
-        <button>Let's get shrinkifying!</button>
-      </form>
+    <% if (!user) { %>
+      <label>Welcome!</label> <a href="/login">Login</a> <a href="/register">Register</a>
     <% } else { %>
-      <label>Welcome, <%= username %>!</label>
+      <label>Welcome, <%= user.email %>!</label>
       <form action="/logout" method="POST">
         <button>Logout</button>
       </form>
