@@ -8,22 +8,23 @@
 
 
   <% for (var x in urls) { %>
-    <form method="POST" action='/urls/<%= x %>/delete'>
-    <p>
-      <%= x %>
-      (<%= urls[x] %>)
-
-
-      <a href="/urls/<%= x %>">Edit</a>
-
-      <button>Delete</button>
-
-    </p>
-    </form>
+      <form method="POST" action='/urls/<%= urls[x].shortURL %>/delete'>
+      <p>
+        Short URL: http://localhost:8080/u/<%= urls[x].shortURL %></br></br>
+        Original: (<%= urls[x].longURL %>)
+        <a href="/urls/<%= urls[x].shortURL %>">Edit</a>
+        <button>Delete</button>
+      </p>
+      </br>
+      </form>
   <% } %>
 
 
 
+  <% if (user) { %>
    <p><a href="/urls/new">Shrinkify a new link!</a></p>
+  <% } else { %>
+    <p>Please <a href="/login">log in</a> to start shrinkifying!</p>
+  <% } %>
   </body>
 </html>

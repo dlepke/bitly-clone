@@ -5,12 +5,15 @@
 
 
   <body>
+  <% if (user) { %>
   <h3>My Short URL: <%= shortURL %></h3>
 
   <form action="/urls/<%= shortURL %>/edit" method="POST">
     <input id='longURL' type='text' name='longURL' value="<%= longURL %>" style='width:300px'>
     <button type='update' action="/urls/<% shortURL %>/edit">Update</button>
   </form>
+  <% } else { %>
+    <p>Please <a href="/login">log in</a> first.</p>
+  <% } %>
   </body>
 </html>
-

@@ -8,6 +8,13 @@
 <body>
 <h3>Login</h3>
 
+<% if (fromUrlsNew) { %>
+<p style="color:red;">
+  Please <b>log in</b> first.
+</p>
+<% } %>
+
+
 <form action="/login" method="POST">
   <input id="email" type="text" name="email" placeholder="Enter your email">
   <input id="password" type="password" name="password" placeholder="Enter your password">
