@@ -24,12 +24,14 @@ let urlDatabase = {
   "b2xVn2": {
     "shortURL": "b2xVn2",
     "longURL": "http://www.lighthouselabs.ca",
-    "owner": "hermione"
+    "owner": "hermione",
+    "clicks": 0
   },
   "9sm5xK": {
     "shortURL": "9sm5xK",
     "longURL": "http://www.google.com",
-    "owner": "ron"
+    "owner": "ron",
+    "clicks": 0
   }
 };
 
@@ -120,17 +122,21 @@ app.get('/urls/:id', (req, res) => {
     shortURL: req.params.id,
     longURL: longURL,
     user: users[currentUserId],
-    owner: urlDatabase[req.params.id].owner
+    owner: urlDatabase[req.params.id].owner,
+    clicks: urlDatabase[req.params.id].clicks
   };
   res.render('urls_show', templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
-    let longURL = urlDatabase[req.params.shortURL].longURL;
+    let longURL = urlDatabase[req.params.shortURL]["longURL"];
+    urlDatabase[req.params.shortURL].clicks += 1;
     res.redirect(longURL);
+    return;
   } else {
     res.redirect('/fourhundred-url');
+    return;
   }
 });
 
@@ -183,14 +189,15 @@ app.put('/urls/:id/edit', (req, res) => {
   res.redirect(`/urls`);
 });
 
-app.put('/urls', (req, res) => {
+app.post('/urls', (req, res) => {
   const randomString = generateRandomString();
   urlDatabase[randomString] = {
     "shortURL": randomString,
     "longURL": req.body.longURL,
-    "owner": req.session.userId
+    "owner": req.session.userId,
+    "clicks": 0
   };
-  const templateVars = { longURL: req.body.longURL};
+  //const templateVars = { longURL: req.body.longURL };
   res.redirect('/urls');
 });
 
@@ -229,6 +236,9 @@ app.put('/logout', (req, res) => {
   req.session = null;
   res.redirect('/urls');
 });
+
+
+
 
 app.post('/register', (req, res) => {
   let userEmailArray = [];
