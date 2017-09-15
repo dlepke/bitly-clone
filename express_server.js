@@ -25,13 +25,13 @@ let urlDatabase = {
     "shortURL": "b2xVn2",
     "longURL": "http://www.lighthouselabs.ca",
     "owner": "hermione",
-    "clicks": 0
+    "clicks": 0,
   },
   "9sm5xK": {
     "shortURL": "9sm5xK",
     "longURL": "http://www.google.com",
     "owner": "ron",
-    "clicks": 0
+    "clicks": 0,
   }
 };
 
@@ -123,7 +123,7 @@ app.get('/urls/:id', (req, res) => {
     longURL: longURL,
     user: users[currentUserId],
     owner: urlDatabase[req.params.id].owner,
-    clicks: urlDatabase[req.params.id].clicks
+    clicks: urlDatabase[req.params.id].clicks,
   };
   res.render('urls_show', templateVars);
 });
@@ -195,9 +195,8 @@ app.post('/urls', (req, res) => {
     "shortURL": randomString,
     "longURL": req.body.longURL,
     "owner": req.session.userId,
-    "clicks": 0
+    "clicks": 0,
   };
-  //const templateVars = { longURL: req.body.longURL };
   res.redirect('/urls');
 });
 
