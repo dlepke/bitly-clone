@@ -8,8 +8,7 @@
 
 
   <% for (var x in urls) { %>
-
-      <form method="POST" action='/urls/<%= urls[x].shortURL %>/delete'>
+      <form method="POST" action='/urls/<%= urls[x].shortURL %>?_method=DELETE'>
       <p>
         Short URL: http://localhost:8080/u/<%= urls[x].shortURL %></br></br>
         Original: (<%= urls[x].longURL %>)

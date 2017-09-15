@@ -14,7 +14,7 @@
     <% if (userId === urlUserId) { %>
       <h3>My Short URL: <%= shortURL %></h3>
 
-      <form action="/urls/<%= shortURL %>/edit" method="POST">
+      <form action="/urls/<%= shortURL %>/edit?_method=PUT" method="POST">
         <input id='longURL' type='text' name='longURL' value="<%= longURL %>"   style='width:300px'>
         <button type='update' action="/urls/<% shortURL %>/edit">Update</button>
       </form>

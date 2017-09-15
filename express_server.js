@@ -1,6 +1,9 @@
-var express = require('express');
-var app = express();
-var PORT = process.env.PORT || 8080;
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 8080;
+
+const methodOverride = require('method-override');
+app.use(methodOverride('_method'));
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
@@ -15,7 +18,7 @@ const bcrypt = require('bcrypt');
 
 app.set('view engine', 'ejs');
 
-//end middle implementing
+//end middleware implementing
 
 function generateRandomString() {
   var chars = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -163,19 +166,19 @@ app.get('/fourhundred-url', (req, res) => {
 
 
 
-app.post('/urls/:id/delete', (req, res) => {
+app.delete('/urls/:id', (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect('/urls');
 });
 
-app.post('/urls/:id/edit', (req, res) => {
+app.put('/urls/:id/edit', (req, res) => {
   urlDatabase[req.params.id]["shortURL"] = req.params.id;
   urlDatabase[req.params.id]["longURL"] = req.body.longURL;
   urlDatabase[req.params.id]["user_id"] = req.session.user_id;
   res.redirect(`/urls`);
 });
 
-app.post('/urls', (req, res) => {
+app.put('/urls', (req, res) => {
   const randomString = generateRandomString();
   urlDatabase[randomString] = {
     "shortURL": randomString,
@@ -206,7 +209,7 @@ function validateUser(email, password) {
   }
 }
 
-app.post('/login', (req, res) => {
+app.put('/login', (req, res) => {
   const hashedPassword = bcrypt.hashSync(req.body.password, 10);
   var user = validateUser(req.body.email, req.body.password);
   if (user.email) {
@@ -220,7 +223,7 @@ app.post('/login', (req, res) => {
   }
 });
 
-app.post('/logout', (req, res) => {
+app.put('/logout', (req, res) => {
   req.session = null;
   res.redirect('/urls');
 });

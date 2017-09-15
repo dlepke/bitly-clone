@@ -7,7 +7,7 @@
       <label>Welcome!</label> <a href="/login">Login</a> <a href="/register">Register</a>
     <% } else { %>
       <label>Welcome, <%= user.email %>!</label>
-      <form action="/logout" method="POST">
+      <form action="/logout?_method=PUT" method="POST">
         <button>Logout</button>
       </form>
     <% } %>
