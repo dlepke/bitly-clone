@@ -4,8 +4,10 @@ TineApp is a full stack web applicatoin built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["Screenshot of the Register page"](https://github.com/dlepke/bitly-clone/blob/master/docs/Register-page.png?raw=true)
+!["Screenshot of the Homepage"](https://github.com/dlepke/bitly-clone/blob/master/docs/Homepage.png?raw=true)
+!["Screenshot of the Edit a URL page"](https://github.com/dlepke/bitly-clone/blob/master/docs/Edit-url-page.png?raw=true)
+
 
 ## Dependencies
 
