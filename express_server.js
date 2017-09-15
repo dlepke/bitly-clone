@@ -20,45 +20,46 @@ app.set('view engine', 'ejs');
 
 //end middleware implementing
 
-function generateRandomString() {
-  var chars = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  var length = 6;
-  var result = '';
-  for (var i = length; i > 0; i--) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-}
-
-var urlDatabase = {
+let urlDatabase = {
   "b2xVn2": {
     "shortURL": "b2xVn2",
     "longURL": "http://www.lighthouselabs.ca",
-    "urlUserId": "hermione"
+    "owner": "hermione"
   },
   "9sm5xK": {
     "shortURL": "9sm5xK",
     "longURL": "http://www.google.com",
-    "urlUserId": "ron"
+    "owner": "ron"
   }
 };
 
-var users = {
+let users = {
   "hermione": {
-    user_id: "hermione",
+    userId: "hermione",
     email: "hermione@hogwarts.com",
     password: bcrypt.hashSync("ilovereading", 10)
   },
   "ron": {
-    user_id: "ron",
+    userId: "ron",
     email: "ron@hogwarts.com",
     password: bcrypt.hashSync("scabberssucks", 10)
   }
 };
 
 
+function generateRandomString() {
+  const chars = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const length = 6;
+  let result = '';
+  for (let i = length; i > 0; i--) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+}
+
+
 app.get('/', (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.userId) {
     res.redirect('/urls');
   } else {
     res.redirect('/login');
@@ -66,26 +67,27 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  function urlsForUserLister(id) {
-    var matchingUrls = {};
-    for (var urlKey in urlDatabase) {
-      if (urlDatabase[urlKey].urlUserId === id) {
+
+  function urlsForUserLister(userIdHere) {
+    let matchingUrls = {};
+    for (let urlKey in urlDatabase) {
+      if (urlDatabase[urlKey].owner === userIdHere) {
         matchingUrls[urlKey] = urlDatabase[urlKey];
       }
     }
     return matchingUrls;
   }
 
-  if (req.session.user_id) {
-    let userId = req.session.user_id;
-    var urlsForUser = urlsForUserLister(userId);
-    let templateVars = {
+  if (req.session) {
+    const currentUserId = req.session.userId;
+    const urlsForUser = urlsForUserLister(currentUserId);
+    const templateVars = {
       urls: urlsForUser,
-      user: users[userId]
+      user: users[currentUserId]
     };
     res.render('urls_index', templateVars);
   } else {
-    let templateVars = {
+    const templateVars = {
       user: undefined,
       urls: undefined
     };
@@ -94,14 +96,14 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  if (req.session.user_id) {
-    let userId = req.session.user_id;
-    let templateVars = { user: users[userId] };
+  if (req.session.userId) {
+    const currentUserId = req.session.userId;
+    const templateVars = { user: users[currentUserId] };
     res.render('urls_new', templateVars);
   } else {
-    let userId = req.session.user_id;
-    let templateVars = {
-      user: users[userId],
+    const currentUserId = req.session.userId;
+    const templateVars = {
+      user: users[currentUserId],
       fromUrlsNew: true
     };
     res.render('login', templateVars);
@@ -109,16 +111,16 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls/:id', (req, res) => {
-  let userId = req.session.user_id;
+  const currentUserId = req.session.userId;
   if (!urlDatabase[req.params.id]) {
-    res.redirect('/error-code-pages/fourhundred-url');
+    res.render('error-code-pages/fourhundred-url');
   }
-  let longURL = urlDatabase[req.params.id].longURL;
-  let templateVars = {
+  const longURL = urlDatabase[req.params.id].longURL;
+  const templateVars = {
     shortURL: req.params.id,
     longURL: longURL,
-    user: users[req.session.user_id],
-    urlUserId: urlDatabase[req.params.id].urlUserId
+    user: users[currentUserId],
+    owner: urlDatabase[req.params.id].owner
   };
   res.render('urls_show', templateVars);
 });
@@ -133,10 +135,10 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  let userId = req.session.user_id;
-  let templateVars = { user: users[userId] };
+  const currentUserId = req.session.userId;
+  const templateVars = { user: users[currentUserId] };
 
-  if (req.session.user_id) {
+  if (req.session.userId) {
     res.redirect('/urls');
   }
 
@@ -148,11 +150,11 @@ app.get('/fourhundred-email', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.userId) {
     res.redirect('/urls');
   }
-  let userId = req.session.user_id;
-  let templateVars = {
+  const userId = req.session.userId;
+  const templateVars = {
     user: users[userId],
     fromUrlsNew: false
   };
@@ -171,10 +173,13 @@ app.delete('/urls/:id', (req, res) => {
   res.redirect('/urls');
 });
 
+
+
+
 app.put('/urls/:id/edit', (req, res) => {
   urlDatabase[req.params.id]["shortURL"] = req.params.id;
   urlDatabase[req.params.id]["longURL"] = req.body.longURL;
-  urlDatabase[req.params.id]["user_id"] = req.session.user_id;
+  urlDatabase[req.params.id]["owner"] = req.session.userId;
   res.redirect(`/urls`);
 });
 
@@ -183,22 +188,20 @@ app.put('/urls', (req, res) => {
   urlDatabase[randomString] = {
     "shortURL": randomString,
     "longURL": req.body.longURL,
-    "urlUserId": req.session.user_id
+    "owner": req.session.userId
   };
-  var templateVars = { longURL: req.body.longURL};
+  const templateVars = { longURL: req.body.longURL};
   res.redirect('/urls');
 });
 
-
-
 function validateUser(email, password) {
-  var user = {};
-  for (var userId in users) {
+  let user = {};
+  for (let userId in users) {
     if (users[userId].email === email && bcrypt.compareSync(password, users[userId].password)) {
       user = {
         email: email,
         password: password,
-        user_id: userId
+        userId: userId
       };
     }
   }
@@ -208,15 +211,14 @@ function validateUser(email, password) {
     return false;
   }
 }
-
 app.put('/login', (req, res) => {
   const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-  var user = validateUser(req.body.email, req.body.password);
+  const user = validateUser(req.body.email, req.body.password);
   if (user.email) {
     req.session.email = req.body.email;
     req.session.password = hashedPassword;
-    req.session.user_id = user["user_id"];
-    var templateVars = { user };
+    req.session.userId = user.userId;
+    const templateVars = { user };
     res.redirect('/urls');
   } else {
     res.render('error-code-pages/fourohthree');
@@ -230,7 +232,7 @@ app.put('/logout', (req, res) => {
 
 app.post('/register', (req, res) => {
   let userEmailArray = [];
-  for (var userId in users) {
+  for (let userId in users) {
     userEmailArray.push(users[userId].email);
   }
   function checkIfExisting(givenEmail, userEmail) {
@@ -242,8 +244,8 @@ app.post('/register', (req, res) => {
     }
     return false;
   }
-  var emailIsValid = true;
-  for (var i in userEmailArray) {
+  let emailIsValid = true;
+  for (let i in userEmailArray) {
     if (checkIfExisting(req.body.email, userEmailArray[i])) {
       emailIsValid = false;
       break;
@@ -254,12 +256,12 @@ app.post('/register', (req, res) => {
   }
   const hashedPassword = bcrypt.hashSync(req.body.password, 10);
   if (emailIsValid) {
-    var randomID = generateRandomString();
+    const randomID = generateRandomString();
     req.session.email = req.body.email;
     req.session.password = hashedPassword;
-    req.session.user_id = randomID;
+    req.session.userId = randomID;
     users[randomID] = {
-      user_id: randomID,
+      userId: randomID,
       email: req.body.email,
       password: hashedPassword
     };

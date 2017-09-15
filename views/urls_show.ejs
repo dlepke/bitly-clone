@@ -8,10 +8,10 @@
     <% var userId = 'notamatch' %>
 
     <% if (user) { %>
-      <% userId = user.user_id %>
+      <% userId = user.userId %>
     <% } %>
 
-    <% if (userId === urlUserId) { %>
+    <% if (userId === owner) { %>
       <h3>My Short URL: <%= shortURL %></h3>
 
       <form action="/urls/<%= shortURL %>/edit?_method=PUT" method="POST">

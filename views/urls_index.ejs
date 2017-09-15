@@ -6,7 +6,6 @@
   <body>
   <h1>Your Short URLs</h1>
 
-
   <% for (var x in urls) { %>
       <form method="POST" action='/urls/<%= urls[x].shortURL %>?_method=DELETE'>
       <p>
