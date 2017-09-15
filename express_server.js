@@ -42,12 +42,12 @@ var urlDatabase = {
 
 var users = {
   "hermione": {
-    id: "hermione",
+    user_id: "hermione",
     email: "hermione@hogwarts.com",
     password: bcrypt.hashSync("ilovereading", 10)
   },
   "ron": {
-    id: "ron",
+    user_id: "ron",
     email: "ron@hogwarts.com",
     password: bcrypt.hashSync("scabberssucks", 10)
   }
