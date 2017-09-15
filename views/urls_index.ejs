@@ -8,6 +8,7 @@
 
 
   <% for (var x in urls) { %>
+
       <form method="POST" action='/urls/<%= urls[x].shortURL %>/delete'>
       <p>
         Short URL: http://localhost:8080/u/<%= urls[x].shortURL %></br></br>
@@ -17,6 +18,7 @@
       </p>
       </br>
       </form>
+
   <% } %>
 
 

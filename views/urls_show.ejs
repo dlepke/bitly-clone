@@ -5,15 +5,25 @@
 
 
   <body>
-  <% if (user) { %>
-  <h3>My Short URL: <%= shortURL %></h3>
+    <% var userId = 'notamatch' %>
 
-  <form action="/urls/<%= shortURL %>/edit" method="POST">
-    <input id='longURL' type='text' name='longURL' value="<%= longURL %>" style='width:300px'>
-    <button type='update' action="/urls/<% shortURL %>/edit">Update</button>
-  </form>
-  <% } else { %>
-    <p>Please <a href="/login">log in</a> first.</p>
-  <% } %>
+    <% if (user) { %>
+      <% userId = user.id %>
+    <% } %>
+
+    <% if (userId === urlUserId) { %>
+      <h3>My Short URL: <%= shortURL %></h3>
+
+      <form action="/urls/<%= shortURL %>/edit" method="POST">
+        <input id='longURL' type='text' name='longURL' value="<%= longURL %>"   style='width:300px'>
+        <button type='update' action="/urls/<% shortURL %>/edit">Update</button>
+      </form>
+    <% } else if (user) { %>
+      <p style="color:red;">
+        <b>You can not edit this URL.</b>
+      </p>
+    <% } else { %>
+      <p>Please <a href="/login">log in</a> first.</p>
+    <% } %>
   </body>
 </html>

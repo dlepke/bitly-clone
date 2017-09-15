@@ -2,12 +2,11 @@ var express = require('express');
 var app = express();
 var PORT = process.env.PORT || 8080;
 
-
 const bodyParser = require('body-parser');    //this is the middleware
 app.use(bodyParser.urlencoded({extended: true}));
 
 const cookieSession = require('cookie-session');
-app.use(cookieSession({
+app.use(cookieSession({ //the spacing might seem weird here but I just copied the syntax from the example
   name: 'session',
   keys: ["hello"]
 }));
@@ -15,6 +14,8 @@ app.use(cookieSession({
 const bcrypt = require('bcrypt');
 
 app.set('view engine', 'ejs');
+
+//end middle implementing
 
 function generateRandomString() {
   var chars = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -25,13 +26,6 @@ function generateRandomString() {
   }
   return result;
 }
-
-//this approach might produce duplicates of existing strings in use,
-//so the same url -> different possible sources -> conflict
-
-//could check for existing urls then if the one generated is already in use,
-//go through and generate a new one for the same request
-
 
 var urlDatabase = { //this is the url database in use
   "b2xVn2": {
@@ -60,32 +54,15 @@ var users = {   //this is where users are held, and new users sent
 };
 
 
-// function urlsForUser(id) {
-//   var matchingUrls = {};
-//   for (var urlKey in urlDatabase) {
-//     if (urlDatabase[urlKey].urlUserId === id) {
-//       matchingUrls[urlKey] = urlDatabase[urlKey];
-//     }
-//   }
-//   return matchingUrls;
-// }
-
-
-
-app.get('/', (req, res) => { //homepage currently just says 'Hello!'
-  res.end("Hello!");
+app.get('/', (req, res) => { //redirects to /urls
+  if (req.session.user_id) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
-app.get('/urls.json', (req, res) => { //this just shows you the contents of the returned json object
-  res.json(urlDatabase);
-});
-
-app.get('/hello', (req, res) => { //this is just a random page
-  res.end("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-app.get('/urls', (req, res) => {             //this is the list of urls and short urls (homepage-ish)
-
+app.get('/urls', (req, res) => { //this is the list of urls and short urls (homepage)
   function urlsForUser(id) {
     var matchingUrls = {};
     for (var urlKey in urlDatabase) {
@@ -124,43 +101,61 @@ app.get('/urls/new', (req, res) => {        //this is where you enter a new url 
 
 app.get('/urls/:id', (req, res) => { // this is where you view a specific url/short url pair
   let user_id = req.session.user_id;
+  if (!urlDatabase[req.params.id]) {
+    res.redirect('/error-code-pages/fourhundred-url');
+  }
   let longURL = urlDatabase[req.params.id].longURL
   let templateVars = { shortURL: req.params.id,
-                       longURL: longURL, //toString() fixes weird problem where it was trying to convert id to a number
-                       user: users[user_id] };
+                       longURL: longURL,
+                       user: users[req.session.user_id],
+                       urlUserId: urlDatabase[req.params.id].urlUserId };
   res.render('urls_show', templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => { // this is what redirects when you click a short url
-  let longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+  if (urlDatabase[req.params.shortURL]) {
+    let longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  } else {
+    res.redirect('/fourhundred-url');
+  }
 });
 
 app.get('/register', (req, res) => {
   let user_id = req.session.user_id;
   let templateVars = { user: users[user_id] };
+
+  if (req.session.user_id) {
+    res.redirect('/urls');
+  }
+
   res.render('register', templateVars);
 })
 
-app.get('/fourhundred', (req, res) => {
-  res.render('fourhundred')
+app.get('/fourhundred-email', (req, res) => {
+  res.render('error-code-pages/fourhundred-email')
 })
 
 app.get('/login', (req, res) => {
+  if (req.session.user_id) {
+    res.redirect('/urls');
+  }
   let user_id = req.session.user_id;
   let templateVars = { user: users[user_id],
                        fromUrlsNew: false };
   res.render('login', templateVars);
 })
 
+app.get('/fourhundred-url', (req, res) => {
+  res.render('error-code-pages/fourhundred-url');
+})
 
 
 
-app.post('/urls/:id/delete', (req, res) => { //this handles delete requests
-  if (req.session.user_id === urlDatabase[req.params.id].user_id) {
-    delete urlDatabase[req.params.id];
-    res.redirect('/urls');
-  }
+
+app.post('/urls/:id/delete', (req, res) => { //this handles delete requests from /urls
+  delete urlDatabase[req.params.id];
+  res.redirect('/urls');
 })
 
 app.post('/urls/:id/edit', (req, res) => {
@@ -178,7 +173,7 @@ app.post('/urls', (req, res) => { // this is what adds the new url/short url pai
     "urlUserId": req.session.user_id
   }
   var templateVars = { longURL: req.body.longURL}
-  res.redirect(`/urls/${randomString}`);
+  res.redirect('/urls');
 });
 
 
@@ -194,20 +189,24 @@ function validateUser(email, password) {
       }
     }
   }
-  return user;
+  if (user) {
+    return user;
+  } else {
+    return false;
+  }
 }
 
 app.post('/login', (req, res) => {
   const hashedPassword = bcrypt.hashSync(req.body.password, 10)
   var user = validateUser(req.body.email, req.body.password);
-  if (user) {
+  if (user.email) {
     req.session.email = req.body.email;
     req.session.password = hashedPassword;
     req.session.user_id = user["user_id"];
     var templateVars = { user };
     res.redirect('/urls');
   } else {
-    res.render('fourohthree');
+    res.render('error-code-pages/fourohthree');
   }
 })
 
@@ -224,12 +223,21 @@ app.post('/register', (req, res) => {
   function checkIfExisting(givenEmail, userEmail) {
     return givenEmail === userEmail;
   }
+  function checkIfEmpty(givenEmail, givenPassword) {
+    if (givenEmail === '' || givenPassword === '') {
+      return true;
+    }
+    return false;
+  }
   var emailIsValid = true;
   for (var i in userEmailArray) {
     if (checkIfExisting(req.body.email, userEmailArray[i])) {
       emailIsValid = false;
       break;
     }
+  }
+  if (checkIfEmpty(req.body.email, req.body.password)) {
+    res.render('error-code-pages/fourohthree');
   }
   const hashedPassword = bcrypt.hashSync(req.body.password, 10);
   if (emailIsValid) {
@@ -244,7 +252,7 @@ app.post('/register', (req, res) => {
     }
     res.redirect('/urls');
   } else {
-    res.redirect('/fourhundred')
+    res.redirect('/fourhundred-email')
   }
 })
 
