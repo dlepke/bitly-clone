@@ -30,13 +30,13 @@ let urlDatabase = {
     "clicks": 0,
     "visitors": [],
     "uniquevisitors": [],
-    "timestamps": [],
+    "timestamps": []
   },
   "9sm5xK": {
     "shortURL": "9sm5xK",
     "longURL": "http://www.google.com",
     "owner": "ron",
-    "clicks": 0, //change to visits array with visitor id as entry (only unique entries), another for timestamps
+    "clicks": 0,
     "visitors": [],
     "uniquevisitors": [],
     "timestamps": []
