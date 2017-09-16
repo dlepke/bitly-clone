@@ -5,6 +5,8 @@ const PORT = process.env.PORT || 8080;
 const methodOverride = require('method-override');
 app.use(methodOverride('_method'));
 
+const dateFormat = require('dateformat');
+
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -26,12 +28,18 @@ let urlDatabase = {
     "longURL": "http://www.lighthouselabs.ca",
     "owner": "hermione",
     "clicks": 0,
+    "visitors": [],
+    "uniquevisitors": [],
+    "timestamps": [],
   },
   "9sm5xK": {
     "shortURL": "9sm5xK",
     "longURL": "http://www.google.com",
     "owner": "ron",
-    "clicks": 0,
+    "clicks": 0, //change to visits array with visitor id as entry (only unique entries), another for timestamps
+    "visitors": [],
+    "uniquevisitors": [],
+    "timestamps": []
   }
 };
 
@@ -124,14 +132,29 @@ app.get('/urls/:id', (req, res) => {
     user: users[currentUserId],
     owner: urlDatabase[req.params.id].owner,
     clicks: urlDatabase[req.params.id].clicks,
+    visitors: urlDatabase[req.params.id].visitors,
+    uniquevisitors: urlDatabase[req.params.id].uniquevisitors,
+    timestamps: urlDatabase[req.params.id].timestamps
   };
+  console.log(urlDatabase[req.params.id].visitors);
   res.render('urls_show', templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
+
+  if (!req.session.clickerId) {
+    req.session.clickerId = generateRandomString();
+    urlDatabase[req.params.shortURL].visitors.push(req.session.clickerId);
+  } else {
+    urlDatabase[req.params.shortURL].visitors.push(req.session.clickerId);
+  }
+  urlDatabase[req.params.shortURL].uniquevisitors = new Set(urlDatabase[req.params.shortURL].visitors);
+
   if (urlDatabase[req.params.shortURL]) {
     let longURL = urlDatabase[req.params.shortURL]["longURL"];
+
     urlDatabase[req.params.shortURL].clicks += 1;
+    urlDatabase[req.params.shortURL].timestamps.push(dateFormat(new Date(), 'isoDateTime'));
     res.redirect(longURL);
     return;
   } else {
@@ -146,6 +169,7 @@ app.get('/register', (req, res) => {
 
   if (req.session.userId) {
     res.redirect('/urls');
+    return;
   }
 
   res.render('register', templateVars);
@@ -158,6 +182,7 @@ app.get('/fourhundred-email', (req, res) => {
 app.get('/login', (req, res) => {
   if (req.session.userId) {
     res.redirect('/urls');
+    return;
   }
   const userId = req.session.userId;
   const templateVars = {
@@ -196,6 +221,9 @@ app.post('/urls', (req, res) => {
     "longURL": req.body.longURL,
     "owner": req.session.userId,
     "clicks": 0,
+    "visitors": [],
+    "uniquevisitors": [],
+    "timestamps": []
   };
   res.redirect('/urls');
 });
@@ -224,7 +252,6 @@ app.put('/login', (req, res) => {
     req.session.email = req.body.email;
     req.session.password = hashedPassword;
     req.session.userId = user.userId;
-    const templateVars = { user };
     res.redirect('/urls');
   } else {
     res.render('error-code-pages/fourohthree');

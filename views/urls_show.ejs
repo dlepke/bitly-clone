@@ -19,6 +19,9 @@
         <button type='update' action="/urls/<% shortURL %>/edit">Update</button>
       </form>
       <p>Clicks: <%= clicks %></p>
+      <p>Visitors: <%= uniquevisitors.size %></p>
+      <p>Visits: <%= timestamps %></p>
+      <p>Visited by: <%= visitors %></p>
     <% } else if (user) { %>
       <p style="color:red;">
         <b>You can not edit this URL.</b>
